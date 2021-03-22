@@ -25,9 +25,9 @@ parallel bash -c '"python3 bin/ema.py stock/{}.csv 12 26 && touch macd_cross/.tm
 grep -wf <(ls macd_cross/.tmp) meta/id_to_name.txt >> macd_cross/$date.txt
 rm -r macd_cross/.tmp
 
-awk -F'\t' 'ARGIND == 1 {a[$1]=$2; next} {$3=$2 in a?a[$2]:0;print}' <(curl -s "https://raw.githubusercontent.com/dibery/positioncalculation/master/record/$date.txt") macd_cross/$date.txt | sponge macd_cross/$date.txt
+awk -v OFS='\t' -F'\t' 'ARGIND == 1 {a[$1]=$2; next} NF > 1 {$3=$2 in a?a[$2]:0;print}' <(curl -s "https://raw.githubusercontent.com/dibery/positioncalculation/master/record/$date.txt") macd_cross/$date.txt | sponge macd_cross/$date.txt
 
-git add index macd_cross raw 2> /dev/null
+git add index macd_cross raw
 git commit -m 'Info update' 2> /dev/null
 git push origin master 2> /dev/null
 mail -s "$date MACD cross" dibery@ntu.im < macd_cross/$date.txt
